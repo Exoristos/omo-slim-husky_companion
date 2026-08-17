@@ -1,0 +1,307 @@
+:root {
+  color-scheme: dark;
+  font-family: "Avenir Next", "Segoe UI Variable", "Segoe UI", ui-sans-serif,
+    system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  --ink: #e4f1f7;
+  --muted-ink: rgba(228, 241, 247, 0.72);
+  --chip-fill: rgba(9, 20, 31, 0.78);
+  --chip-border: rgba(190, 224, 239, 0.22);
+  --ambient-color: rgba(133, 194, 224, 0.52);
+  --status-color: #9bcde2;
+  --status-ring: rgba(155, 205, 226, 0.15);
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  color: var(--ink);
+}
+
+.companion {
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 13px;
+}
+
+.pet-stage {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex: 0 0 230px;
+  width: 240px;
+  height: 230px;
+  align-items: flex-end;
+  justify-content: center;
+  user-select: none;
+  cursor: grab;
+}
+
+.pet-stage:active {
+  cursor: grabbing;
+}
+
+.pet-stage::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: 16px;
+  width: 182px;
+  height: 116px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    var(--ambient-color) 0%,
+    rgba(133, 194, 224, 0.12) 46%,
+    transparent 74%
+  );
+  filter: blur(12px);
+  opacity: 0.13;
+  transform: translateX(-50%) scale(0.9);
+  pointer-events: none;
+  animation: ambient-idle 6.8s ease-in-out infinite;
+}
+
+.pet-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: 9px;
+  width: 96px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgba(4, 14, 24, 0.28);
+  filter: blur(5px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.pet {
+  --sprite-row-offset: 0px;
+  --sprite-frame-count: 6;
+  --sprite-end-x: -1152px; /* frame-count × cell-width (6×192) — 6. kare dahil */
+  --sprite-animation-duration: 900ms; /* idle temposu (R7: CPU azaltma) */
+
+  position: relative;
+  z-index: 1;
+  flex: 0 0 192px;
+  width: 192px;
+  height: 208px;
+  background-image: url('assets/spritesheet.webp');
+  background-repeat: no-repeat;
+  background-size: 1536px 1872px;
+  background-position: 0 var(--sprite-row-offset);
+  image-rendering: pixelated;
+  animation: sprite-frames var(--sprite-animation-duration)
+    steps(6, end) infinite; /* tüm durumlar 6 kare; calc() yok (WebKitGTK uyumluluğu) */
+  pointer-events: none;
+}
+
+/* Atlas rows: idle 0/-0px, busy 7/-1456px, waiting-input 6/-1248px. */
+body[data-state="idle"] {
+  --ambient-color: rgba(133, 194, 224, 0.52);
+  --status-color: #9bcde2;
+  --status-ring: rgba(155, 205, 226, 0.15);
+}
+
+body[data-state="idle"] .pet {
+  --sprite-row-offset: 0px;
+  --sprite-animation-duration: 900ms;
+}
+
+body[data-state="busy"] {
+  --ambient-color: rgba(89, 205, 195, 0.62);
+  --status-color: #7bd8cf;
+  --status-ring: rgba(123, 216, 207, 0.15);
+}
+
+body[data-state="waiting-input"] {
+  --ambient-color: rgba(244, 194, 113, 0.58);
+  --status-color: #f0c579;
+  --status-ring: rgba(240, 197, 121, 0.15);
+}
+
+body[data-state="busy"] .pet {
+  --sprite-row-offset: -1456px;
+  --sprite-animation-duration: 600ms;
+}
+
+body[data-state="waiting-input"] .pet {
+  --sprite-row-offset: -1248px;
+  --sprite-animation-duration: 600ms;
+}
+
+body[data-state="busy"] .pet-stage::before {
+  opacity: 0.18;
+  animation-name: ambient-busy;
+}
+
+body[data-state="waiting-input"] .pet-stage::before {
+  opacity: 0.16;
+  animation-name: ambient-waiting;
+}
+
+.status-label {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 202px;
+  min-height: 24px;
+  margin: 3px 0 0;
+  padding: 4px 10px 4px 9px;
+  overflow: hidden;
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 38, 53, 0.84),
+    var(--chip-fill)
+  );
+  box-shadow: 0 8px 18px rgba(2, 10, 17, 0.16);
+  color: var(--muted-ink);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 14px;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.status-label::before {
+  content: "";
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-color);
+  box-shadow: 0 0 0 3px var(--status-ring);
+}
+
+.prompt-input {
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 3;
+  left: 24px;
+  bottom: 14px;
+  width: 192px;
+  height: 28px;
+  margin: 0;
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  outline: none;
+  background: rgba(8, 19, 29, 0.82);
+  box-shadow: 0 7px 18px rgba(1, 8, 14, 0.2);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    border-color 160ms ease;
+}
+
+.prompt-input::placeholder {
+  color: rgba(228, 241, 247, 0.48);
+}
+
+body[data-prompt-visible="true"] .prompt-input,
+.prompt-input:focus {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.prompt-input:focus {
+  border-color: rgba(155, 205, 226, 0.62);
+  box-shadow:
+    0 0 0 2px rgba(155, 205, 226, 0.13),
+    0 7px 18px rgba(1, 8, 14, 0.2);
+}
+
+@keyframes sprite-frames {
+  from {
+    background-position: 0 var(--sprite-row-offset);
+  }
+  to {
+    background-position: var(--sprite-end-x) var(--sprite-row-offset);
+  }
+}
+
+@keyframes ambient-idle {
+  0%,
+  100% {
+    opacity: 0.11;
+    transform: translateX(-50%) scale(0.88);
+  }
+  50% {
+    opacity: 0.2;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+@keyframes ambient-busy {
+  0%,
+  100% {
+    opacity: 0.14;
+    transform: translateX(-50%) scale(0.88);
+  }
+  50% {
+    opacity: 0.3;
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+@keyframes ambient-waiting {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: translateX(-50%) translateY(1px) scale(0.9);
+  }
+  50% {
+    opacity: 0.26;
+    transform: translateX(-50%) translateY(-2px) scale(1.01);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet,
+  .pet-stage::before,
+  .prompt-input {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenCode companion</title>
+    <script type="module" src="main.js" defer></script>
+  </head>
+
+  <body data-state="idle" data-agent="intro">
+    <main class="companion" aria-label="OpenCode companion">
+      <div class="pet-stage" data-tauri-drag-region aria-label="Agent status">
+        <div class="pet" aria-hidden="true"></div>
+      </div>
+
+      <p class="status-label" id="status-label" role="status" aria-live="polite">
+        intro · idle
+      </p>
+
+      <input
+        class="prompt-input"
+        id="prompt-input"
+        type="text"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="Enter a response"
+        aria-label="Prompt response"
+      />
+    </main>
+  </body>
+</html>

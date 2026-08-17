@@ -139,6 +139,10 @@ body[data-state="idle"] {
 body[data-state="idle"] .pet-sprite {
   --sprite-row-offset: 0px;
   --sprite-animation-duration: 900ms;
+  /* Idle: atlas'ta tek kapalı-göz karesi var (frame 2) ve geçiş karesi yok.
+     Tek kare 150ms'de "göz kırpma" değil strobe gibi görünür. sprite-idle
+     keyframe'i kapalı kareyi 2 segment tutar → gerçek kırpma hissi. */
+  animation: sprite-idle 1200ms steps(1, end) infinite;
 }
 
 body[data-state="busy"] {
@@ -330,6 +334,30 @@ body[data-prompt-visible="true"] .prompt-input,
   }
   100% {
     transform: translateX(0); /* frame 0: çömelme */
+  }
+}
+
+/* Idle: frame 2 tek kapalı-göz karesi. steps(1,end) ile her segment kareyi
+   sabit tutar; kapalı kare 2 segment (30-60%) sürer → strobe değil kırpma.
+   Kareler: 0 açık → 1 açık → 2 kapalı → 2 kapalı(tekrar) → 3 açık → 0. */
+@keyframes sprite-idle {
+  0% {
+    transform: translateX(0); /* frame 0: gözler açık */
+  }
+  15% {
+    transform: translateX(-192px); /* frame 1: gözler açık */
+  }
+  30% {
+    transform: translateX(-384px); /* frame 2: gözler kapalı */
+  }
+  60% {
+    transform: translateX(-384px); /* frame 2 tekrar: kırpma süresi */
+  }
+  75% {
+    transform: translateX(-576px); /* frame 3: gözler açık */
+  }
+  100% {
+    transform: translateX(0); /* frame 0'a dön */
   }
 }
 

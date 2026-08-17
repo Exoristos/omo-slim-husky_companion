@@ -108,16 +108,25 @@ body {
   flex: 0 0 192px;
   width: 192px;
   height: 208px;
+  overflow: hidden; /* tek kareye kırp — WebKitGTK background-position
+                       animasyonunda kareleri üst üste boyuyor */
+  pointer-events: none;
+}
+
+.pet-sprite {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1536px; /* atlas genişliği — satırın tamamı */
+  height: 208px;
   background-image: url('assets/spritesheet.webp');
   background-repeat: no-repeat;
   background-size: 1536px 1872px;
   background-position: 0 var(--sprite-row-offset);
   image-rendering: pixelated;
-  /* steps() sabit sayıyla verilir — WebKitGTK var()'ı timing function'da
-     desteklemez (interpolasyon → kareler üst üste biner). */
+  /* transform animasyonu — WebKitGTK'ta güvenilir; steps() sabit sayıyla */
   animation: sprite-frames var(--sprite-animation-duration)
     steps(6, end) infinite;
-  pointer-events: none;
 }
 
 /* Atlas rows: idle 0/-0px, busy 7/-1456px, waiting-input 6/-1248px. */
@@ -127,7 +136,7 @@ body[data-state="idle"] {
   --status-ring: rgba(155, 205, 226, 0.15);
 }
 
-body[data-state="idle"] .pet {
+body[data-state="idle"] .pet-sprite {
   --sprite-row-offset: 0px;
   --sprite-animation-duration: 900ms;
 }
@@ -144,7 +153,7 @@ body[data-state="waiting-input"] {
   --status-ring: rgba(240, 197, 121, 0.15);
 }
 
-body[data-state="busy"] .pet {
+body[data-state="busy"] .pet-sprite {
   --sprite-row-offset: -1456px;
   --sprite-animation-duration: 600ms;
   animation: sprite-frames 600ms steps(6, end) infinite;
@@ -154,43 +163,43 @@ body[data-state="busy"] .pet {
    row 1 running-right(-208px, 8f) · row 2 running-left(-416px, 8f)
    row 3 waving(-624px, 4f) · row 4 jumping(-832px, 5f)
    row 8 review(-1664px, 6f) · row 7 running(-1456px, 6f) default */
-body[data-state="busy"][data-agent="oracle"] .pet,
-body[data-state="busy"][data-agent="fixer"] .pet {
+body[data-state="busy"][data-agent="oracle"] .pet-sprite,
+body[data-state="busy"][data-agent="fixer"] .pet-sprite {
   /* Jumping: atlas'ta 5 kareden 3'ü aynı havada durma pozu (frame 1-3).
      Gerçek zıplama hissi için özel keyframe: çömelme → havada → iniş. */
   animation: sprite-jump 900ms steps(1, end) infinite;
 }
 
-body[data-state="busy"][data-agent="explorer"] .pet {
+body[data-state="busy"][data-agent="explorer"] .pet-sprite {
   --sprite-row-offset: -416px; /* running-left */
   --sprite-end-x: -1536px;
   --sprite-animation-duration: 550ms;
   animation: sprite-frames 550ms steps(8, end) infinite;
 }
 
-body[data-state="busy"][data-agent="observer"] .pet {
+body[data-state="busy"][data-agent="observer"] .pet-sprite {
   --sprite-row-offset: -208px; /* running-right */
   --sprite-end-x: -1536px;
   --sprite-animation-duration: 550ms;
   animation: sprite-frames 550ms steps(8, end) infinite;
 }
 
-body[data-state="busy"][data-agent="designer"] .pet {
+body[data-state="busy"][data-agent="designer"] .pet-sprite {
   --sprite-row-offset: -624px; /* waving */
   --sprite-end-x: -768px;
   --sprite-animation-duration: 700ms;
   animation: sprite-frames 700ms steps(4, end) infinite;
 }
 
-body[data-state="busy"][data-agent="librarian"] .pet,
-body[data-state="busy"][data-agent="council"] .pet {
+body[data-state="busy"][data-agent="librarian"] .pet-sprite,
+body[data-state="busy"][data-agent="council"] .pet-sprite {
   --sprite-row-offset: -1664px; /* review */
   --sprite-end-x: -1152px;
   --sprite-animation-duration: 600ms;
   animation: sprite-frames 600ms steps(6, end) infinite;
 }
 
-body[data-state="waiting-input"] .pet {
+body[data-state="waiting-input"] .pet-sprite {
   --sprite-row-offset: -1248px;
   --sprite-animation-duration: 600ms;
   animation: sprite-frames 600ms steps(6, end) infinite;
@@ -296,10 +305,10 @@ body[data-prompt-visible="true"] .prompt-input,
 
 @keyframes sprite-frames {
   from {
-    background-position: 0 var(--sprite-row-offset);
+    transform: translateX(0);
   }
   to {
-    background-position: var(--sprite-end-x) var(--sprite-row-offset);
+    transform: translateX(var(--sprite-end-x));
   }
 }
 
@@ -308,19 +317,19 @@ body[data-prompt-visible="true"] .prompt-input,
    kareyi sabit tutar: çömelme → havada → iniş → çömelme. */
 @keyframes sprite-jump {
   0% {
-    background-position: 0 -832px; /* frame 0: çömelme */
+    transform: translateX(0); /* frame 0: çömelme */
   }
   15% {
-    background-position: -192px -832px; /* frame 1: havada */
+    transform: translateX(-192px); /* frame 1: havada */
   }
   55% {
-    background-position: -192px -832px; /* frame 1: havada bekleme */
+    transform: translateX(-192px); /* frame 1: havada bekleme */
   }
   75% {
-    background-position: -768px -832px; /* frame 4: iniş */
+    transform: translateX(-768px); /* frame 4: iniş */
   }
   100% {
-    background-position: 0 -832px; /* frame 0: çömelme */
+    transform: translateX(0); /* frame 0: çömelme */
   }
 }
 
@@ -382,7 +391,7 @@ body[data-prompt-visible="true"] .prompt-input,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pet,
+  .pet-sprite,
   .pet-stage::before,
   .prompt-input {
     animation-duration: 1ms !important;

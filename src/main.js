@@ -42,7 +42,7 @@ function setState(status, activeAgents, fallbackAgent = "intro") {
   const agent = getAgentName(activeAgents) || fallbackAgent;
 
   document.body.dataset.state = state;
-  document.body.dataset.agent = agent;
+  document.body.dataset.agent = agent.toLowerCase();
   statusLabel.textContent = agent ? `${agent} · ${state}` : state;
 }
 

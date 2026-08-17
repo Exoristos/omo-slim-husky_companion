@@ -100,7 +100,7 @@ body {
 
 .pet {
   --sprite-row-offset: 0px;
-  --sprite-frame-count: 6;
+  --sprite-steps: 6;
   --sprite-end-x: -1152px; /* frame-count × cell-width (6×192) — 6. kare dahil */
   --sprite-animation-duration: 900ms; /* idle temposu (R7: CPU azaltma) */
 
@@ -115,7 +115,7 @@ body {
   background-position: 0 var(--sprite-row-offset);
   image-rendering: pixelated;
   animation: sprite-frames var(--sprite-animation-duration)
-    steps(6, end) infinite; /* tüm durumlar 6 kare; calc() yok (WebKitGTK uyumluluğu) */
+    steps(var(--sprite-steps, 6), end) infinite; /* calc() yok (WebKitGTK uyumluluğu) */
   pointer-events: none;
 }
 
@@ -145,6 +145,47 @@ body[data-state="waiting-input"] {
 
 body[data-state="busy"] .pet {
   --sprite-row-offset: -1456px;
+  --sprite-animation-duration: 600ms;
+}
+
+/* Agent-specific busy animations (atlas rows):
+   row 1 running-right(-208px, 8f) · row 2 running-left(-416px, 8f)
+   row 3 waving(-624px, 4f) · row 4 jumping(-832px, 5f)
+   row 8 review(-1664px, 6f) · row 7 running(-1456px, 6f) default */
+body[data-state="busy"][data-agent="oracle"] .pet,
+body[data-state="busy"][data-agent="fixer"] .pet {
+  --sprite-row-offset: -832px; /* jumping */
+  --sprite-steps: 5;
+  --sprite-end-x: -960px;
+  --sprite-animation-duration: 500ms;
+}
+
+body[data-state="busy"][data-agent="explorer"] .pet {
+  --sprite-row-offset: -416px; /* running-left */
+  --sprite-steps: 8;
+  --sprite-end-x: -1536px;
+  --sprite-animation-duration: 550ms;
+}
+
+body[data-state="busy"][data-agent="observer"] .pet {
+  --sprite-row-offset: -208px; /* running-right */
+  --sprite-steps: 8;
+  --sprite-end-x: -1536px;
+  --sprite-animation-duration: 550ms;
+}
+
+body[data-state="busy"][data-agent="designer"] .pet {
+  --sprite-row-offset: -624px; /* waving */
+  --sprite-steps: 4;
+  --sprite-end-x: -768px;
+  --sprite-animation-duration: 700ms;
+}
+
+body[data-state="busy"][data-agent="librarian"] .pet,
+body[data-state="busy"][data-agent="council"] .pet {
+  --sprite-row-offset: -1664px; /* review */
+  --sprite-steps: 6;
+  --sprite-end-x: -1152px;
   --sprite-animation-duration: 600ms;
 }
 

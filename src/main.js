@@ -147,11 +147,18 @@ if (petStage) {
 }
 
 // Prompt lifecycle: Escape hides, Enter echoes (v1; Phase 4+ may forward to
-// the opencode CLI).
+// the opencode CLI). Ctrl+Enter hides the whole window.
 if (promptInput) {
   promptInput.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       hidePrompt();
+    } else if (event.ctrlKey && event.key === "Enter") {
+      event.preventDefault();
+      hidePrompt();
+      window.__TAURI__?.window
+        ?.getCurrentWindow()
+        .hide()
+        .catch((error) => console.warn("hide başarısız:", error));
     } else if (event.key === "Enter") {
       const value = promptInput.value;
       console.log("[prompt]", value);
